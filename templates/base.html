@@ -9,5 +9,11 @@
     <body>
         <h1>Bienvenido a Mi Blog commit</h1>
         <p>Este es un blog simple hecho con Flask.</p>
+        {% include 'navbar.html' %}
+        <div>
+            {% block content %}
+            este es el base html
+            {% endblock %}
+        </div>
     </body>
 </html>
