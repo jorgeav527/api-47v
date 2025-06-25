@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, abort
 import sqlite3
 
 def get_db_connection():
@@ -23,6 +23,16 @@ def get_all_posts():
     posts = conn.execute('SELECT * FROM posts').fetchall()
     conn.close()
     return render_template('post/post_list.html', posts=posts)
+
+
+@app.route('/posts/<int:post_id>', methods=['GET'])
+def get_one_post(post_id):
+    conn = get_db_connection()
+    post = conn.execute('SELECT * FROM posts WHERE id = ?', (post_id,)).fetchone()
+    conn.close()
+    if post is None:
+        abort(404)
+    return render_template("post/post.html", post=post)
 
 if __name__ == '__main__':
     app.run(debug=True)
