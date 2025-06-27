@@ -1,21 +1,12 @@
 # api-47v
 
-Creamos la base de datos con sqlite3
-sqlite3 database.db
-Creamos un esquema para una tabla insertamos unas entidades y para visualizar de manera adecuada configuramos nuestro sqlite3
-DROP TABLE IF EXISTS posts;
+```bash
+git clone git@github.com:jorgeav527/api-47v.git
+virtualenv .venv
+source .venv/Scripts/activate
+pip install -r requirements.txt
+python main.py
+```
 
-CREATE TABLE posts (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    title TEXT NOT NULL,
-    content TEXT NOT NULL
-);
 
-INSERT INTO posts (title, content) VALUES ('Primer post', 'Que tal pythonistas');
-INSERT INTO posts (title, content) VALUES ('Segundo post', 'Buen dia con todos');
 
-.headers on
-.mode column
-
-SELECT * FROM posts;
