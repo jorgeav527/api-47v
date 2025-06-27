@@ -1,4 +1,4 @@
-from flask import Flask, render_template, abort, request, redirect, url_for
+from flask import Flask, render_template, abort, request, redirect, url_for, jsonify
 import sqlite3
 
 def get_db_connection():
@@ -73,6 +73,22 @@ def delete_one_post(post_id):
     conn.close()
     return "", 200
 
+
+@app.route('/api/new', methods=['GET'])
+def new():
+    datos = [
+        {
+        "nombre": "Jorge",
+        "edad": 35,
+        "trabaja": True
+        },
+        {
+        "nombre": "Jaime",
+        "edad": 34,
+        "trabaja": False
+        },
+    ]
+    return datos, 200
 
 if __name__ == '__main__':
     app.run(debug=True)
