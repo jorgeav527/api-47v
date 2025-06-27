@@ -35,7 +35,7 @@ def get_one_post(post_id):
     return render_template("post/post.html", post=post)
 
 @app.route('/posts/create', methods=['GET', 'POST'])
-def create_post():
+def create_one_post():
     if request.method == "GET":
         return render_template("post/create.html")
     if request.method == "POST":
@@ -47,6 +47,22 @@ def create_post():
         conn.close()
         return redirect(url_for('get_all_posts'))
     
+
+@app.route('/posts/edit/<int:post_id>', methods=['GET', 'POST'])
+def edit_one_post(post_id):
+    if request.method == "GET":
+        conn = get_db_connection()
+        post = conn.execute('SELECT * FROM posts WHERE id = ?', (post_id,)).fetchone()
+        conn.close()
+        return render_template("post/edit.html", post=post)
+    if request.method == "POST":
+        title = request.form["title"]
+        content = request.form["content"]
+        conn = get_db_connection()
+        conn.execute('UPDATE posts SET title = ?, content = ? WHERE id = ?', (title, content, post_id))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('get_all_posts'))
 
 
 if __name__ == '__main__':

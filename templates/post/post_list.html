@@ -3,6 +3,7 @@
 {% block content %}
 <h1>Bienvenido a Mis Posts</h1>
 <p>Algunos posts acontinuación:</p>
+<a class="btn btn-primary mb-3" href="{{ url_for('create_one_post') }}">Nuevo Post</a>
     <table class="table table-bordered">
         <thead>
             <tr>
@@ -10,6 +11,7 @@
                 <th>Título</th>
                 <th>Contenido</th>
                 <th>Fecha de Creación</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -19,6 +21,7 @@
                     <td>{{ post['title'] }}</td>
                     <td>{{ post['content'] }}</td>
                     <td>{{ post['created'] }}</td>
+                    <td><a href="{{ url_for('edit_one_post', post_id=post['id']) }}" class="btn btn-warning btn-sm">Editar</a></td>
                 </tr>
             {% endfor %}
         </tbody>
