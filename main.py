@@ -65,14 +65,13 @@ def edit_one_post(post_id):
         return redirect(url_for('get_all_posts'))
     
 
-@app.route('/posts/delete/<int:post_id>', methods=['POST'])
+@app.route('/posts/delete/<int:post_id>', methods=['DELETE'])
 def delete_one_post(post_id):
-    if request.method == "POST":
-        conn = get_db_connection()
-        conn.execute('DELETE FROM posts WHERE id = ?', (post_id,))
-        conn.commit()
-        conn.close()
-        return redirect(url_for('get_all_posts'))
+    conn = get_db_connection()
+    conn.execute('DELETE FROM posts WHERE id = ?', (post_id,))
+    conn.commit()
+    conn.close()
+    return "", 200
 
 
 if __name__ == '__main__':
