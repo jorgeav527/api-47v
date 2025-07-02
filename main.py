@@ -1,6 +1,7 @@
 from typing import Optional
 
-from fastapi import FastAPI, Path, Query
+from fastapi import FastAPI, Path, Query, Form
+from pydantic import BaseModel
 
 base_de_datos = {
     "usuarios": {
@@ -126,3 +127,54 @@ def buscar_productos(
     
     return { "productos": resultados }
 
+
+
+# {
+#     "id": 4,
+#     "nombre": "Carlos Ruiz",
+#     "email": "carlos@example.com",
+#     "activo": True,
+#     "rol": "editor",
+# },
+class UsuarioCreate(BaseModel):
+    nombre: str
+    email: str
+    activo: bool = True
+    rol: str = "usuario"
+
+@app.post("/usuarios/json")
+def create_usuario_json(usuario: UsuarioCreate):
+    print(usuario)
+    nuevo_id = max(base_de_datos["usuarios"].keys()) + 1
+    print(nuevo_id)
+    base_de_datos["usuarios"][nuevo_id] = {
+        "id": nuevo_id,
+        "nombre": usuario.nombre,
+        "email": usuario.email,
+        "activo": usuario.activo,
+        "rol": usuario.rol
+    }
+    print(base_de_datos)
+
+    return { "usuario_id": nuevo_id }
+
+
+@app.post("/usuarios/form-data")
+def crear_usuario_formdata(
+    nombre: str = Form(...),
+    email: str = Form(...),
+    activo: bool = Form(True),
+):
+    print(nombre, email, activo)
+    nuevo_id = max(base_de_datos["usuarios"].keys()) + 1
+    usuario = {
+        "id": nuevo_id,
+        "nombre": nombre,
+        "email": email,
+        "activo": activo,
+        "rol": "usuario"
+    }
+    print(usuario)
+    base_de_datos["usuarios"][nuevo_id] = usuario
+    print(base_de_datos)
+    return { "usuario_id": nuevo_id }
