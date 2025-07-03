@@ -1,93 +1,87 @@
-from flask import Flask, render_template, abort, request, redirect, url_for, jsonify
-import sqlite3
+from flask import Flask, render_template, abort, request, redirect, url_for, flash, jsonify
 
-def get_db_connection():
-    conn = sqlite3.connect("database.db")
-    conn.row_factory = sqlite3.Row
-    return conn
+import post
 
 app = Flask(__name__)
 
-@app.route('/', methods=['GET'])
-def base():
-    return render_template('base.html')
+app.config['SECRET_KEY'] = 'clave_secreta'
 
-@app.route('/home', methods=['GET'])
+@app.route('/')
 def home():
-    titulo = "esta es el html home como variable"
-    return render_template('home.html', titulo=titulo)
+    return render_template('home.html')
 
-@app.route('/posts', methods=['GET'])
+@app.route('/posts')
 def get_all_posts():
-    conn = get_db_connection()
-    posts = conn.execute('SELECT * FROM posts').fetchall()
-    conn.close()
-    return render_template('post/post_list.html', posts=posts)
+    all_posts = post.get_all_posts()
 
+    if request.args.get('format') == 'json':
+        posts_as_dicts = [dict(p) for p in all_posts]
+        return jsonify(posts_as_dicts)
+    
+    return render_template('post/post_list.html', posts=all_posts)
 
-@app.route('/posts/<int:post_id>', methods=['GET'])
+@app.route('/posts/<int:post_id>')
 def get_one_post(post_id):
-    conn = get_db_connection()
-    post = conn.execute('SELECT * FROM posts WHERE id = ?', (post_id,)).fetchone()
-    conn.close()
-    if post is None:
+    one_post = post.get_post_by_id(post_id)
+    if one_post is None:
         abort(404)
-    return render_template("post/post.html", post=post)
+
+    if request.args.get('format') == 'json':
+        return jsonify(dict(one_post))
+
+    return render_template("post/post.html", post=one_post)
 
 @app.route('/posts/create', methods=['GET', 'POST'])
 def create_one_post():
-    if request.method == "GET":
-        return render_template("post/create.html")
     if request.method == "POST":
         title = request.form["title"]
         content = request.form["content"]
-        conn = get_db_connection()
-        conn.execute('INSERT INTO posts (title, content) VALUES (?, ?)', (title, content))
-        conn.commit()
-        conn.close()
-        return redirect(url_for('get_all_posts'))
-    
 
+# Validación
+        if not title or not content:
+            flash("El título y el contenido son obligatorios :)")
+            return render_template("post/create.html")
+
+        post.create_post(title, content)
+        flash("El Post ha sido creado correctamente :)")
+        return redirect(url_for('get_all_posts'))
+
+    return render_template("post/create.html")
+    
 @app.route('/posts/edit/<int:post_id>', methods=['GET', 'POST'])
 def edit_one_post(post_id):
-    if request.method == "GET":
-        conn = get_db_connection()
-        post = conn.execute('SELECT * FROM posts WHERE id = ?', (post_id,)).fetchone()
-        conn.close()
-        return render_template("post/edit.html", post=post)
+    one_post = post.get_post_by_id(post_id)
+    if one_post is None:
+        abort(404)
+
     if request.method == "POST":
         title = request.form["title"]
         content = request.form["content"]
-        conn = get_db_connection()
-        conn.execute('UPDATE posts SET title = ?, content = ? WHERE id = ?', (title, content, post_id))
-        conn.commit()
-        conn.close()
+
+# Validación
+        if not title or not content:
+            flash("El título y el contenido son obligatorios :)")
+            return render_template("post/edit.html", post=one_post)
+        
+        post.edit_post(post_id, title, content)
+        flash("El Post ha sido actualizado correctamente :)")
         return redirect(url_for('get_all_posts'))
     
+    return render_template("post/edit.html", post=one_post)
 
 @app.route('/posts/delete/<int:post_id>', methods=['DELETE'])
 def delete_one_post(post_id):
-    conn = get_db_connection()
-    conn.execute('DELETE FROM posts WHERE id = ?', (post_id,))
-    conn.commit()
-    conn.close()
-    return "", 200
+    post.delete_post(post_id)
+    flash("El Post ha sido eliminado :)")
+    return redirect(url_for('get_all_posts'))
 
+@app.route('/base')
+def base():
+    return render_template('base.html')
 
-@app.route('/api/new', methods=['GET'])
+@app.route('/api/new')
 def new():
-    datos = [
-        {
-        "nombre": "Jorge",
-        "edad": 35,
-        "trabaja": True
-        },
-        {
-        "nombre": "Jaime",
-        "edad": 34,
-        "trabaja": False
-        },
-    ]
+    datos = [{"nombre": "Jorge", "edad": 35, "trabaja": True}, {"nombre": "Jaime", "edad": 34, "trabaja": False}]
     return datos, 200
 
 if __name__ == '__main__':
