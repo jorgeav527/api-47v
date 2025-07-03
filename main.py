@@ -1,4 +1,4 @@
-from flask import Flask, render_template, abort, request, redirect, url_for, flash
+from flask import Flask, render_template, abort, request, redirect, url_for, flash, jsonify
 
 import post
 
@@ -13,6 +13,11 @@ def home():
 @app.route('/posts')
 def get_all_posts():
     all_posts = post.get_all_posts()
+
+    if request.args.get('format') == 'json':
+        posts_as_dicts = [dict(p) for p in all_posts]
+        return jsonify(posts_as_dicts)
+    
     return render_template('post/post_list.html', posts=all_posts)
 
 @app.route('/posts/<int:post_id>')
@@ -20,6 +25,10 @@ def get_one_post(post_id):
     one_post = post.get_post_by_id(post_id)
     if one_post is None:
         abort(404)
+
+    if request.args.get('format') == 'json':
+        return jsonify(dict(one_post))
+
     return render_template("post/post.html", post=one_post)
 
 @app.route('/posts/create', methods=['GET', 'POST'])
