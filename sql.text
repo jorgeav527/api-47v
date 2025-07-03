@@ -1,5 +1,6 @@
-sqlite3 database.db
-Creamos un esquema para una tabla insertamos unas entidades y para visualizar de manera adecuada configuramos nuestro sqlite3
+-- sqlite3 database.db
+-- Creamos un esquema para una tabla insertamos unas entidades y para visualizar de manera adecuada configuramos nuestro sqlite3
+
 DROP TABLE IF EXISTS posts;
 
 CREATE TABLE posts (
